@@ -1,0 +1,22 @@
+{
+    "name": "ase-websocket",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/**/*"
+    ],
+    "author": "Strelok.js, TillSilph",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/events": "^3.0.3",
+        "@types/uuid": "^10.0.0",
+        "@types/ws": "^8.5.13",
+        "eslint": "^8.56.0"
+    },
+    "dependencies": {
+        "asyncsocket": "github:strelok-js/AsyncSocket",
+        "uuid": "^9.0.1"
+    }
+}
