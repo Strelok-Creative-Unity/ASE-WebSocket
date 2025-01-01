@@ -7,13 +7,19 @@
     "files": [
         "dist/**/*"
     ],
+    "scripts": {
+        "test": "jest"
+    },
     "author": "Strelok.js, TillSilph",
     "license": "ISC",
     "devDependencies": {
         "@types/events": "^3.0.3",
+        "@types/jest": "^29.5.14",
         "@types/uuid": "^10.0.0",
         "@types/ws": "^8.5.13",
-        "eslint": "^8.56.0"
+        "eslint": "^8.56.0",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.2.5"
     },
     "dependencies": {
         "asyncsocket": "github:strelok-js/AsyncSocket",

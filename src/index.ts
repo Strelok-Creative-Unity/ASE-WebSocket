@@ -20,18 +20,27 @@ type WebSocketEngineOptions =
 
 export class WSIncomingDataStore implements IncomingDataStore {
     [key: string]: SentDataStore | unknown;
-    engine: Engine;
     waitId?: string;
-    constructor(engine: Engine, data: SentData) {
-        this.engine = engine;
+    as!: AsyncSocket;
+    constructor(data: SentData) {
         for (const key in data) {
             if (Object.prototype.hasOwnProperty.call(data, key)) {
                 this[key] = data[key];
             }
         }
     }
-    reply(data: SentData | SentDataStore) {
-        return this.engine.send({
+    accept(as: AsyncSocket) {
+        this.as = as;
+        return this;
+    }
+    async send(data: SentData | SentDataStore) {
+        return this.as.send({
+            waitId: typeof data.waitId === 'string' ? data.waitId : this.waitId,
+            ...data,
+        });
+    }
+    async sendNoReply(data: SentDataStore) {
+        return this.as.engine.send({
             waitId: typeof data.waitId === 'string' ? data.waitId : this.waitId,
             ...data,
         });
@@ -61,7 +70,7 @@ export class WebSocketEngine extends EventEmitter implements Engine {
         this.ws.on('message', (blobMessage) => {
             const data = JSONParse(blobMessage.toString());
             if (data === null) return;
-            this.emit('message', new WSIncomingDataStore(this, data));
+            this.emit('message', new WSIncomingDataStore(data));
         });
     }
     send(data: SentData) {
@@ -89,7 +98,7 @@ export class WebSocketServerEngine extends EventEmitter implements ServerEngine 
     }
 }
 
-export function AsyncSocketWSClient(wsc: WebSocket) {
+export function AsyncSocketWSClient(wsc: WebSocket): Promise<AsyncSocket> {
     return new Promise((resolve, reject) => {
         wsc.on('open', async () => {
             const engine = new WebSocketEngine(wsc);
