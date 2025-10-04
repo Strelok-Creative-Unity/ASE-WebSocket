@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 import { ClientRequestArgs, IncomingMessage } from 'http';
-import { AsyncSocket, AsyncSocketServer, Engine, IncomingDataStore, SentData, SentDataStore, ServerEngine } from 'asyncsocket';
+import { AsyncSocket, AsyncSocketPackageData, AsyncSocketServer, Engine, IncomingDataPackage, JSONValue, ServerEngine } from 'asyncsocket';
 
 function JSONParse(message: string) {
     try {
@@ -18,31 +18,29 @@ type WebSocketEngineOptions =
     | { address: string | URL; protocols?: string | string[]; options?: WebSocket.ClientOptions | ClientRequestArgs }
     | WebSocket;
 
-export class WSIncomingDataStore implements IncomingDataStore {
-    [key: string]: SentDataStore | unknown;
+export class WSIncomingDataStore implements IncomingDataPackage {
+    data: JSONValue;
     waitId?: string;
+    isEvent = false;
     as!: AsyncSocket;
-    constructor(data: SentData) {
-        for (const key in data) {
-            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                this[key] = data[key];
-            }
-        }
+    constructor(packageData: IncomingDataPackage) {
+        this.waitId = packageData.waitId;
+        this.data = packageData.data;
     }
     accept(as: AsyncSocket) {
         this.as = as;
         return this;
     }
-    async send(data: SentData | SentDataStore) {
+    async send<d extends JSONValue = JSONValue>(data: AsyncSocketPackageData): Promise<IncomingDataPackage<d>> {
         return this.as.send({
-            waitId: typeof data.waitId === 'string' ? data.waitId : this.waitId,
             ...data,
+            waitId: typeof data.waitId === 'string' ? data.waitId : this.waitId!,
         });
     }
-    async sendNoReply(data: SentDataStore) {
+    async sendNoReply(data: AsyncSocketPackageData) {
         return this.as.engine.send({
-            waitId: typeof data.waitId === 'string' ? data.waitId : this.waitId,
             ...data,
+            waitId: typeof data.waitId === 'string' ? data.waitId : this.waitId!,
         });
     }
 }
@@ -73,13 +71,8 @@ export class WebSocketEngine extends EventEmitter implements Engine {
             this.emit('message', new WSIncomingDataStore(data));
         });
     }
-    send(data: SentData) {
-        this.ws.send(
-            JSON.stringify({
-                ...data,
-                waitId: data.waitId ?? uuidv4(),
-            }),
-        );
+    send(data: JSONValue) {
+        this.ws.send(JSON.stringify(data));
     }
 }
 

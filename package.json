@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "asyncsocket": "github:strelok-js/AsyncSocket",
-        "uuid": "^9.0.1"
+        "uuid": "^9.0.1",
+        "ws": "^8.18.3"
     }
 }

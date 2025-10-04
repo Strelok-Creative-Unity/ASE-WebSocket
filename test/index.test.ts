@@ -25,7 +25,7 @@ describe('WS Server + Client', () => {
             WSServer.on('connection', (socket: AsyncSocket) => {
                 WSServerClient = socket;
                 socket.on('message', (message: WSIncomingDataStore) => {
-                    message.sendNoReply({ test: true });
+                    message.sendNoReply({ isEvent: false, data: message.data });
                 });
                 expect(socket).toBeDefined();
                 resolve();
@@ -37,8 +37,11 @@ describe('WS Server + Client', () => {
     });
 
     it('should send and receive a message', async () => {
-        const response = await WSClient.send({ test: true });
-        expect(response.test).toBe(true);
+        const response = await WSClient.send<{ test: boolean }>({ test: true });
+        expect(response.data.test).toBe(true);
+
+        const response2 = await WSClient.send<{ test: string }>({ test: 'true' });
+        expect(response2.data.test).toBe('true');
     });
 
     it('should send and receive a emit s => c', async () => {
