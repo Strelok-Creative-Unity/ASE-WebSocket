@@ -22,8 +22,7 @@
         "ts-jest": "^29.2.5"
     },
     "dependencies": {
-        "asyncsocket": "github:strelok-js/AsyncSocket",
-        "uuid": "^9.0.1",
+        "asyncsocket": "github:strelok-js/AsyncSocket#test",
         "ws": "^8.18.3"
     }
 }
